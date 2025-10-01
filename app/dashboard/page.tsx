@@ -21,6 +21,22 @@ import {
 } from 'lucide-react';
 import { PlatformConnection } from '@/types';
 
+// Type definitions for dashboard state
+interface StatItem {
+  name: string;
+  value: string;
+  change: string;
+  icon: React.ComponentType<any>;
+  color: string;
+}
+
+interface ActivityItem {
+  type: string;
+  message: string;
+  time: string;
+  icon: React.ComponentType<any>;
+}
+
 // Icon mapping for platforms
 const platformIcons = {
   youtube: Youtube,
@@ -42,8 +58,8 @@ const conversionFunnel = [
 
 export default function Dashboard() {
   const [platforms, setPlatforms] = useState<PlatformConnection[]>([]);
-  const [stats, setStats] = useState([]);
-  const [recentActivity, setRecentActivity] = useState([]);
+  const [stats, setStats] = useState<StatItem[]>([]);
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
 
   useEffect(() => {
     // Load platform data from localStorage
