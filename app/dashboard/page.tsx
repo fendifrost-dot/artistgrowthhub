@@ -50,7 +50,7 @@ export default function Dashboard() {
     const savedPlatforms = localStorage.getItem('connectedPlatforms');
     if (savedPlatforms) {
       try {
-        const parsedPlatforms = JSON.parse(savedPlatforms);
+        const parsedPlatforms = JSON.parse(savedPlatforms) as PlatformConnection[];
         setPlatforms(parsedPlatforms);
         
         // Calculate stats based on connected platforms
