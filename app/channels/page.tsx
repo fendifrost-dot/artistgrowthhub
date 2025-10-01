@@ -204,6 +204,36 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const normalizeConnectedHandle = (input: string) => {
+  if (!input) {
+    return '';
+  }
+
+  const trimmed = input.trim();
+
+  if (trimmed.startsWith('EAA')) {
+    return 'Access Token Connected';
+  }
+
+  if (!trimmed.includes('://')) {
+    return trimmed;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    const segments = parsed.pathname.split('/').filter(Boolean);
+
+    if (segments.length > 0) {
+      return segments[segments.length - 1];
+    }
+
+    return parsed.hostname.replace(/^www\./, '');
+  } catch (error) {
+    console.warn('Unable to parse connection handle URL, falling back to raw input.', error);
+    return trimmed;
+  }
+};
+
 export default function ChannelsPage() {
   const [platforms_state, setPlatforms] = useState<PlatformData[]>([]);
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
@@ -275,40 +305,40 @@ export default function ChannelsPage() {
     const trimmedInput = connectionInput.trim();
     if (!trimmedInput) return;
 
-    // Set to syncing state
+    const normalizedHandle = normalizeConnectedHandle(trimmedInput);
+
+    setConnectingPlatform(platformId);
+    setConnectionInput('');
+
     setPlatforms(prev =>
       prev.map(p =>
         p.id === platformId
           ? {
               ...p,
               status: 'syncing',
-              connectedHandle: trimmedInput.includes('://')
-                ? trimmedInput.split('/').filter(Boolean).pop() || trimmedInput
-                : trimmedInput.startsWith('EAA')
-                  ? 'Access Token Connected'
-                  : trimmedInput
+              connectedHandle: normalizedHandle
             }
           : p
       )
     );
 
-    // Simulate connection process
     setTimeout(() => {
-      setPlatforms(prev => 
-        prev.map(p => 
-          p.id === platformId 
-            ? { 
-                ...p, 
+      setPlatforms(prev =>
+        prev.map(p =>
+          p.id === platformId
+            ? {
+                ...p,
                 status: 'connected' as ConnectionStatus,
                 lastSync: 'just now',
                 nextSync: `in ${p.refreshInterval}`,
-                recordCount: Math.floor(Math.random() * 200) + 10
+                recordCount:
+                  p.recordCount > 0 ? p.recordCount : Math.floor(Math.random() * 200) + 10,
+                connectedHandle: normalizedHandle
               }
             : p
         )
       );
       setConnectingPlatform(null);
-      setConnectionInput('');
     }, 2000);
   };
 
