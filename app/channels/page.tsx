@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Separator } from '@/components/ui/separator';
 import { Music, Youtube, Facebook, Instagram, Twitter, Link as LinkIcon, Webhook, CircleCheck as CheckCircle, Circle as XCircle, Clock, RefreshCw, ExternalLink, Unlink, Settings } from 'lucide-react';
 import { PlatformConnection, ConnectionStatus } from '@/types';
+import { normalizeConnectedHandle } from '@/lib/normalizeConnectedHandle';
 
 // Define a more specific type for our platform data
 interface PlatformData {
@@ -201,36 +202,6 @@ const getStatusColor = (status: string) => {
       return 'bg-blue-500';
     default:
       return 'bg-gray-500';
-  }
-};
-
-const normalizeConnectedHandle = (input: string) => {
-  if (!input) {
-    return '';
-  }
-
-  const trimmed = input.trim();
-
-  if (trimmed.startsWith('EAA')) {
-    return 'Access Token Connected';
-  }
-
-  if (!trimmed.includes('://')) {
-    return trimmed;
-  }
-
-  try {
-    const parsed = new URL(trimmed);
-    const segments = parsed.pathname.split('/').filter(Boolean);
-
-    if (segments.length > 0) {
-      return segments[segments.length - 1];
-    }
-
-    return parsed.hostname.replace(/^www\./, '');
-  } catch (error) {
-    console.warn('Unable to parse connection handle URL, falling back to raw input.', error);
-    return trimmed;
   }
 };
 
