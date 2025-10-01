@@ -5,9 +5,8 @@ export type Platform =
   | 'youtube' 
   | 'facebook' 
   | 'instagram' 
-  | 'twitter' 
-  | 'tiktok' 
-  | 'hypeddit' 
+  | 'twitter'
+  | 'tiktok'
   | 'even';
 
 export type ConnectionStatus = 'connected' | 'disconnected' | 'pending' | 'error';

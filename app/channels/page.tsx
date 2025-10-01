@@ -38,7 +38,7 @@ const iconMap = {
   facebook: Facebook
 };
 
-const platforms: PlatformData[] = [
+const defaultPlatforms: PlatformData[] = [
   {
     id: 'youtube',
     name: 'YouTube',
@@ -121,7 +121,7 @@ const platforms: PlatformData[] = [
     status: 'disconnected',
     connectionType: 'app_token',
     inputType: 'token',
-    placeholder: 'Enter your Facebook App Token (starts with EAA)',
+    placeholder: 'Enter your Facebook Page Access Token (starts with EAA)',
     refreshInterval: '6 hours',
     whatWeCollect: ['Page insights', 'Post engagement', 'Follower demographics', 'Page performance metrics'],
     lastSync: null,
@@ -212,16 +212,55 @@ export default function ChannelsPage() {
   // Load platforms from localStorage on mount
   useEffect(() => {
     const savedPlatforms = localStorage.getItem('connectedPlatforms');
-    if (savedPlatforms) {
-      try {
-        const parsed = JSON.parse(savedPlatforms);
-        setPlatforms(parsed);
-      } catch (error) {
-        console.error('Error loading saved platforms:', error);
-        setPlatforms(platforms);
-      }
-    } else {
-      setPlatforms(platforms);
+
+    if (!savedPlatforms) {
+      setPlatforms(defaultPlatforms);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(savedPlatforms) as PlatformData[];
+
+      const mergedPlatforms = defaultPlatforms.map((platform) => {
+        const savedPlatform = parsed.find((item) => item.id === platform.id);
+
+        if (!savedPlatform) {
+          return platform;
+        }
+
+        const platformFromStorage: PlatformData = {
+          ...platform,
+          ...savedPlatform,
+          name: platform.name,
+          iconKey: platform.iconKey,
+          connectionType: platform.connectionType,
+          inputType: platform.inputType,
+          placeholder: platform.placeholder,
+          refreshInterval: platform.refreshInterval,
+          whatWeCollect: platform.whatWeCollect,
+          setupInstructions: platform.setupInstructions,
+        };
+
+        if (savedPlatform.status === 'syncing') {
+          return {
+            ...platformFromStorage,
+            status: 'connected',
+            lastSync: 'just now',
+            nextSync: `in ${platform.refreshInterval}`,
+            recordCount:
+              savedPlatform.recordCount && savedPlatform.recordCount > 0
+                ? savedPlatform.recordCount
+                : Math.floor(Math.random() * 200) + 10,
+          };
+        }
+
+        return platformFromStorage;
+      });
+
+      setPlatforms(mergedPlatforms);
+    } catch (error) {
+      console.error('Error loading saved platforms:', error);
+      setPlatforms(defaultPlatforms);
     }
   }, []);
 
@@ -233,18 +272,21 @@ export default function ChannelsPage() {
   }, [platforms_state]);
 
   const handleQuickConnect = (platformId: string) => {
-    if (!connectionInput.trim()) return;
+    const trimmedInput = connectionInput.trim();
+    if (!trimmedInput) return;
 
     // Set to syncing state
-    setPlatforms(prev => 
-      prev.map(p => 
-        p.id === platformId 
-          ? { 
-              ...p, 
+    setPlatforms(prev =>
+      prev.map(p =>
+        p.id === platformId
+          ? {
+              ...p,
               status: 'syncing',
-              connectedHandle: connectionInput.includes('://') 
-                ? connectionInput.split('/').pop() || connectionInput
-                : connectionInput.startsWith('EAA') ? 'App Token Connected' : connectionInput
+              connectedHandle: trimmedInput.includes('://')
+                ? trimmedInput.split('/').filter(Boolean).pop() || trimmedInput
+                : trimmedInput.startsWith('EAA')
+                  ? 'Access Token Connected'
+                  : trimmedInput
             }
           : p
       )
@@ -283,15 +325,15 @@ export default function ChannelsPage() {
     
     if (authPending && (code || error)) {
       localStorage.removeItem('instagram_auth_pending');
-      
+
       if (code) {
         // Success - simulate successful connection
         setTimeout(() => {
-          setPlatforms(prev => 
-            prev.map(p => 
-              p.id === 'instagram' 
-                ? { 
-                    ...p, 
+          setPlatforms(prev =>
+            prev.map(p =>
+              p.id === 'instagram'
+                ? {
+                    ...p,
                     status: 'connected' as ConnectionStatus,
                     lastSync: 'just now',
                     nextSync: 'in 6 hours',
@@ -301,23 +343,40 @@ export default function ChannelsPage() {
                 : p
             )
           );
-          
+
           // Clean up URL
           window.history.replaceState({}, document.title, window.location.pathname);
         }, 1000);
       } else {
         // Error or user cancelled
-        setPlatforms(prev => 
-          prev.map(p => 
-            p.id === 'instagram' 
+        setPlatforms(prev =>
+          prev.map(p =>
+            p.id === 'instagram'
               ? { ...p, status: 'disconnected' as ConnectionStatus }
               : p
           )
         );
-        
+
         // Clean up URL
         window.history.replaceState({}, document.title, window.location.pathname);
       }
+    } else if (authPending) {
+      // Stale pending state from a previous attempt - clear and reset the card
+      localStorage.removeItem('instagram_auth_pending');
+      setPlatforms(prev =>
+        prev.map(p =>
+          p.id === 'instagram'
+            ? {
+                ...p,
+                status: 'disconnected' as ConnectionStatus,
+                lastSync: null,
+                nextSync: null,
+                recordCount: 0,
+                connectedHandle: null
+              }
+            : p
+        )
+      );
     }
   }, []);
 
@@ -520,7 +579,10 @@ export default function ChannelsPage() {
                     <DialogTrigger asChild>
                       <Button 
                         className="w-full bg-purple-600 hover:bg-purple-700"
-                        onClick={() => setConnectingPlatform(platform.id)}
+                        onClick={() => {
+                          setConnectingPlatform(platform.id);
+                          setConnectionInput('');
+                        }}
                       >
                         <LinkIcon className="w-4 h-4 mr-2" />
                         Quick Connect
@@ -571,12 +633,15 @@ export default function ChannelsPage() {
                 ) : platform.connectionType === 'app_token' ? (
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button 
+                      <Button
                         className="w-full bg-purple-600 hover:bg-purple-700"
-                        onClick={() => setConnectingPlatform(platform.id)}
+                        onClick={() => {
+                          setConnectingPlatform(platform.id);
+                          setConnectionInput('');
+                        }}
                       >
                         <LinkIcon className="w-4 h-4 mr-2" />
-                        Connect with Token
+                        Connect with Access Token
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="bg-gray-800 border-gray-700">
@@ -585,7 +650,7 @@ export default function ChannelsPage() {
                       </DialogHeader>
                       <div className="space-y-4">
                         <div>
-                          <Label className="text-gray-300">App Token</Label>
+                          <Label className="text-gray-300">Page Access Token</Label>
                           <Input
                             value={connectionInput}
                             onChange={(e) => setConnectionInput(e.target.value)}
@@ -593,7 +658,7 @@ export default function ChannelsPage() {
                             className="bg-gray-700 border-gray-600 text-white mt-2"
                           />
                           <p className="text-xs text-gray-400 mt-1">
-                            Your Facebook App Token should start with "EAA"
+                            Your Facebook Page Access Token should start with "EAA"
                           </p>
                         </div>
                         <div className="text-xs text-gray-400">

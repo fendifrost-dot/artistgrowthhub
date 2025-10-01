@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { DESTINATION_IDS } from "./destinations";
+
 export const BaseEvent = z.object({
   type: z.string(),
   ts: z.string().optional(),
@@ -14,21 +16,21 @@ export const BaseEvent = z.object({
 
 export const StreamSignal = BaseEvent.extend({
   type: z.literal("StreamSignal"),
-  platform: z.enum(["spotify","apple","soundcloud"]),
+  platform: z.enum(["spotify", "apple", "soundcloud"]),
   track_id: z.string(),
   count: z.number().default(1),
 });
 
 export const ClickOutbound = BaseEvent.extend({
   type: z.literal("ClickOutbound"),
-  dest: z.enum(["even","shopify","spotify","apple","soundcloud"]),
+  dest: z.enum([...DESTINATION_IDS]),
   content_id: z.string(),
   click_id: z.string(),
 });
 
 export const PurchaseEvt = BaseEvent.extend({
   type: z.literal("Purchase"),
-  source: z.enum(["shopify","even"]),
+  source: z.enum(["shopify", "even"]),
   order_id: z.string(),
   value: z.number(),
   currency: z.string(),

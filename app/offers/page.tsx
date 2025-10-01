@@ -60,7 +60,7 @@ const mockOffers: DisplayOffer[] = [
       discount_pct: 20,
       couponCode: 'BUNDLE20',
       coupon: 'BUNDLE20',
-      url: 'https://bemoremodest.com/collections/fendi-frost'
+      url: 'https://www.bemoremodest.com/collections/fendi-frost'
     },
     audienceId: '4',
     active: false,
