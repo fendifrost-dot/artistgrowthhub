@@ -27,6 +27,7 @@ interface PlatformData {
   recordCount: number;
   connectedHandle: string | null;
   setupInstructions?: string[];
+  optional?: boolean;
 }
 // Icon mapping to handle localStorage serialization
 const iconMap = {
