@@ -220,7 +220,6 @@ const getStatusColor = (status: string) => {
 
 export default function ChannelsPage() {
   const [platforms_state, setPlatforms] = useState<PlatformData[]>([]);
-  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
   const [connectionInput, setConnectionInput] = useState('');
 
   // Load platforms from localStorage on mount
@@ -304,7 +303,6 @@ export default function ChannelsPage() {
       )
     );
 
-    setConnectingPlatform(platformId);
     setConnectionInput('');
 
     // simulate finish
@@ -323,12 +321,7 @@ export default function ChannelsPage() {
             : p
         )
       );
-      setConnectingPlatform(null);
     }, 2000);
-  };
-
-  const handleInstagramLogin = () => {
-    // This function is no longer needed since Instagram uses quick_connect now
   };
 
   // Handle Instagram OAuth callback (this would normally be in a separate callback page)
@@ -595,7 +588,6 @@ export default function ChannelsPage() {
                       <Button 
                         className="w-full bg-purple-600 hover:bg-purple-700"
                         onClick={() => {
-                          setConnectingPlatform(platform.id);
                           setConnectionInput('');
                         }}
                       >
@@ -610,7 +602,13 @@ export default function ChannelsPage() {
                       <div className="space-y-4">
                         <div>
                           <Label className="text-gray-300">
-                            {platform.inputType === 'webhook' ? 'Webhook Token' : 'Profile URL'}
+                            {platform.inputType === 'token'
+                              ? 'App Token'
+                              : platform.inputType === 'pixel_id'
+                              ? 'Pixel ID'
+                              : platform.inputType === 'webhook'
+                              ? 'Webhook URL'
+                              : 'Profile URL'}
                           </Label>
                           <Input
                             value={connectionInput}
@@ -634,7 +632,6 @@ export default function ChannelsPage() {
                           <Button 
                             variant="outline" 
                             onClick={() => {
-                              setConnectingPlatform(null);
                               setConnectionInput('');
                             }}
                             className="border-gray-600 text-gray-300"
@@ -651,7 +648,6 @@ export default function ChannelsPage() {
                       <Button
                         className="w-full bg-purple-600 hover:bg-purple-700"
                         onClick={() => {
-                          setConnectingPlatform(platform.id);
                           setConnectionInput('');
                         }}
                       >
@@ -691,7 +687,6 @@ export default function ChannelsPage() {
                           <Button 
                             variant="outline" 
                             onClick={() => {
-                              setConnectingPlatform(null);
                               setConnectionInput('');
                             }}
                             className="border-gray-600 text-gray-300"
