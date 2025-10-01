@@ -9,14 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Music, Youtube, Facebook, Instagram, Twitter, Link as LinkIcon, Webhook, CircleCheck as CheckCircle, Circle as XCircle, Clock, RefreshCw, ExternalLink, Unlink, Settings } from 'lucide-react';
-import { PlatformConnection, ConnectionStatus } from '@/types';
+import { ConnectionStatus } from '@/types';
 
 // Define a more specific type for our platform data
 interface PlatformData {
   id: string;
   name: string;
   iconKey: string;
-  status: ConnectionStatus;
+  status: 'connected' | 'disconnected' | 'syncing' | 'error';
   connectionType: 'quick_connect' | 'oauth' | 'app_token' | 'api_setup';
   inputType: 'url' | 'token' | 'pixel_id';
   placeholder: string;
@@ -241,7 +241,7 @@ export default function ChannelsPage() {
         p.id === platformId 
           ? { 
               ...p, 
-              status: 'syncing',
+              status: 'syncing' as const,
               connectedHandle: connectionInput.includes('://') 
                 ? connectionInput.split('/').pop() || connectionInput
                 : connectionInput.startsWith('EAA') ? 'App Token Connected' : connectionInput
@@ -257,7 +257,7 @@ export default function ChannelsPage() {
           p.id === platformId 
             ? { 
                 ...p, 
-                status: 'connected' as ConnectionStatus,
+                status: 'connected' as const,
                 lastSync: 'just now',
                 nextSync: `in ${p.refreshInterval}`,
                 recordCount: Math.floor(Math.random() * 200) + 10
@@ -292,7 +292,7 @@ export default function ChannelsPage() {
               p.id === 'instagram' 
                 ? { 
                     ...p, 
-                    status: 'connected' as ConnectionStatus,
+                    status: 'connected' as const,
                     lastSync: 'just now',
                     nextSync: 'in 6 hours',
                     recordCount: Math.floor(Math.random() * 200) + 50,
@@ -310,7 +310,7 @@ export default function ChannelsPage() {
         setPlatforms(prev => 
           prev.map(p => 
             p.id === 'instagram' 
-              ? { ...p, status: 'disconnected' as ConnectionStatus }
+              ? { ...p, status: 'syncing' as const }
               : p
           )
         );
@@ -341,7 +341,7 @@ export default function ChannelsPage() {
         p.id === platformId 
           ? { 
               ...p, 
-              status: 'disconnected' as ConnectionStatus,
+              status: 'disconnected' as const,
               lastSync: null,
               nextSync: null,
               recordCount: 0,
@@ -356,7 +356,7 @@ export default function ChannelsPage() {
     setPlatforms(prev => 
       prev.map(p => 
         p.id === platformId 
-          ? { ...p, status: 'syncing' as ConnectionStatus }
+          ? { ...p, status: 'syncing' as const }
           : p
       )
     );
@@ -367,7 +367,7 @@ export default function ChannelsPage() {
           p.id === platformId 
             ? { 
                 ...p, 
-                status: 'connected' as ConnectionStatus,
+                status: 'connected' as const,
                 lastSync: 'just now',
                 nextSync: `in ${p.refreshInterval}`,
                 recordCount: p.recordCount + Math.floor(Math.random() * 10)
