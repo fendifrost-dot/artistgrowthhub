@@ -7,7 +7,6 @@ export type Platform =
   | 'instagram' 
   | 'twitter' 
   | 'tiktok' 
-  | 'hypeddit' 
   | 'even';
 
 export type ConnectionStatus = 'connected' | 'disconnected' | 'pending' | 'error';

@@ -104,27 +104,27 @@ const platforms: PlatformData[] = [
     id: 'instagram',
     name: 'Instagram',
     iconKey: 'instagram',
-    status: 'connected',
+    status: 'disconnected',
     connectionType: 'quick_connect',
     inputType: 'url',
     placeholder: 'https://instagram.com/yourusername',
     refreshInterval: '6 hours',
     whatWeCollect: ['Public profile info', 'Recent posts & captions', 'Media engagement counts', 'Follower count'],
-    lastSync: '1 hour ago',
-    nextSync: 'in 5 hours',
-    recordCount: 128,
-    connectedHandle: '@fendifrost'
+    lastSync: null,
+    nextSync: null,
+    recordCount: 0,
+    connectedHandle: null
   },
   {
     id: 'facebook',
     name: 'Facebook',
     iconKey: 'facebook',
     status: 'disconnected',
-    connectionType: 'app_token',
-    inputType: 'token',
-    placeholder: 'Enter your Facebook App Token (starts with EAA)',
+    connectionType: 'quick_connect',
+    inputType: 'url',
+    placeholder: 'https://facebook.com/yourusername',
     refreshInterval: '6 hours',
-    whatWeCollect: ['Page insights', 'Post engagement', 'Follower demographics', 'Page performance metrics'],
+    whatWeCollect: ['Public profile info', 'Post engagement', 'Follower count', 'Page performance metrics'],
     lastSync: null,
     nextSync: null,
     recordCount: 0,
@@ -162,8 +162,7 @@ const platforms: PlatformData[] = [
     setupInstructions: [
       'Go to Facebook Events Manager',
       'Find your Pixel ID in the Data Sources section',
-      'Generate a Marketing API access token',
-      'Add both to your Settings page'
+      'Enter your Facebook username and Pixel ID below'
     ]
   },
   {
@@ -508,13 +507,63 @@ export default function ChannelsPage() {
                         ))}
                       </ol>
                     </div>
-                    <Button 
-                      onClick={() => window.open('/settings', '_blank')}
-                      className="w-full bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Settings className="w-4 h-4 mr-2" />
-                      Configure in Settings
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          className="w-full bg-blue-600 hover:bg-blue-700"
+                          onClick={() => setConnectingPlatform(platform.id)}
+                        >
+                          <LinkIcon className="w-4 h-4 mr-2" />
+                          Setup Facebook Pixel
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-gray-800 border-gray-700">
+                        <DialogHeader>
+                          <DialogTitle className="text-white">Setup {platform.name}</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-gray-300">Facebook Username</Label>
+                            <Input
+                              value={connectionInput}
+                              onChange={(e) => setConnectionInput(e.target.value)}
+                              placeholder="your-facebook-username"
+                              className="bg-gray-700 border-gray-600 text-white mt-2"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-gray-300">Facebook Pixel ID</Label>
+                            <Input
+                              placeholder="Enter your Facebook Pixel ID"
+                              className="bg-gray-700 border-gray-600 text-white mt-2"
+                            />
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            <p className="mb-2">Refresh interval: <span className="text-white">{platform.refreshInterval}</span></p>
+                            <p>We'll sync your pixel data every {platform.refreshInterval.toLowerCase()}.</p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button 
+                              onClick={() => handleQuickConnect(platform.id)}
+                              disabled={!connectionInput.trim()}
+                              className="flex-1 bg-blue-600 hover:bg-blue-700"
+                            >
+                              Connect
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => {
+                                setConnectingPlatform(null);
+                                setConnectionInput('');
+                              }}
+                              className="border-gray-600 text-gray-300"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 ) : platform.connectionType === 'quick_connect' ? (
                   <Dialog>
