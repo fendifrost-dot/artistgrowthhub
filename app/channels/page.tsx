@@ -8,8 +8,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { Music, Youtube, Facebook, Instagram, Twitter, Link as LinkIcon, Webhook, CircleCheck as CheckCircle, Circle as XCircle, Clock, RefreshCw, ExternalLink, Unlink, Settings } from 'lucide-react';
-import { PlatformConnection, ConnectionStatus } from '@/types';
+import {
+  Music,
+  Youtube,
+  Facebook,
+  Instagram,
+  Twitter,
+  Link as LinkIcon,
+  CircleCheck as CheckCircle,
+  Circle as XCircle,
+  RefreshCw,
+  Unlink,
+  Settings,
+} from 'lucide-react';
+
 import { normalizeConnectedHandle } from '@/lib/normalizeConnectedHandle';
 
 // Define a more specific type for our platform data
@@ -17,9 +29,9 @@ interface PlatformData {
   id: string;
   name: string;
   iconKey: string;
-  status: ConnectionStatus;
+  status: 'connected' | 'disconnected' | 'syncing' | 'error';
   connectionType: 'quick_connect' | 'oauth' | 'app_token' | 'api_setup';
-  inputType: 'url' | 'token' | 'pixel_id';
+  inputType: 'url' | 'token' | 'pixel_id' | 'webhook';
   placeholder: string;
   refreshInterval: string;
   whatWeCollect: string[];
@@ -27,6 +39,7 @@ interface PlatformData {
   nextSync: string | null;
   recordCount: number;
   connectedHandle: string | null;
+  optional?: boolean;
   setupInstructions?: string[];
 }
 // Icon mapping to handle localStorage serialization
@@ -53,7 +66,7 @@ const defaultPlatforms: PlatformData[] = [
     lastSync: null,
     nextSync: null,
     recordCount: 0,
-    connectedHandle: null
+    connectedHandle: null,
   },
   {
     id: 'spotify',
@@ -68,7 +81,7 @@ const defaultPlatforms: PlatformData[] = [
     lastSync: null,
     nextSync: null,
     recordCount: 0,
-    connectedHandle: null
+    connectedHandle: null,
   },
   {
     id: 'apple',
@@ -83,7 +96,7 @@ const defaultPlatforms: PlatformData[] = [
     lastSync: null,
     nextSync: null,
     recordCount: 0,
-    connectedHandle: null
+    connectedHandle: null,
   },
   {
     id: 'soundcloud',
@@ -128,7 +141,7 @@ const defaultPlatforms: PlatformData[] = [
     lastSync: null,
     nextSync: null,
     recordCount: 0,
-    connectedHandle: null
+    connectedHandle: null,
   },
   {
     id: 'twitter',
@@ -143,7 +156,7 @@ const defaultPlatforms: PlatformData[] = [
     lastSync: null,
     nextSync: null,
     recordCount: 0,
-    connectedHandle: null
+    connectedHandle: null,
   },
   {
     id: 'facebook-pixel',
@@ -179,7 +192,7 @@ const defaultPlatforms: PlatformData[] = [
     lastSync: null,
     nextSync: null,
     recordCount: 0,
-    connectedHandle: null
+    connectedHandle: null,
   }
 ];
 
@@ -278,33 +291,34 @@ export default function ChannelsPage() {
 
     const normalizedHandle = normalizeConnectedHandle(trimmedInput);
 
-    setConnectingPlatform(platformId);
-    setConnectionInput('');
-
+    // move UI into syncing
     setPlatforms(prev =>
       prev.map(p =>
         p.id === platformId
           ? {
               ...p,
               status: 'syncing',
-              connectedHandle: normalizedHandle
+              connectedHandle: normalizedHandle,
             }
           : p
       )
     );
 
+    setConnectingPlatform(platformId);
+    setConnectionInput('');
+
+    // simulate finish
     setTimeout(() => {
       setPlatforms(prev =>
         prev.map(p =>
           p.id === platformId
             ? {
                 ...p,
-                status: 'connected' as ConnectionStatus,
+                status: 'connected',
                 lastSync: 'just now',
                 nextSync: `in ${p.refreshInterval}`,
-                recordCount:
-                  p.recordCount > 0 ? p.recordCount : Math.floor(Math.random() * 200) + 10,
-                connectedHandle: normalizedHandle
+                recordCount: p.recordCount > 0 ? p.recordCount : Math.floor(Math.random() * 200) + 10,
+                connectedHandle: normalizedHandle,
               }
             : p
         )
@@ -335,11 +349,11 @@ export default function ChannelsPage() {
               p.id === 'instagram'
                 ? {
                     ...p,
-                    status: 'connected' as ConnectionStatus,
+                    status: 'connected',
                     lastSync: 'just now',
                     nextSync: 'in 6 hours',
                     recordCount: Math.floor(Math.random() * 200) + 50,
-                    connectedHandle: '@yourhandle'
+                    connectedHandle: '@yourhandle',
                   }
                 : p
             )
@@ -353,7 +367,7 @@ export default function ChannelsPage() {
         setPlatforms(prev =>
           prev.map(p =>
             p.id === 'instagram'
-              ? { ...p, status: 'disconnected' as ConnectionStatus }
+              ? { ...p, status: 'disconnected' }
               : p
           )
         );
@@ -369,11 +383,11 @@ export default function ChannelsPage() {
           p.id === 'instagram'
             ? {
                 ...p,
-                status: 'disconnected' as ConnectionStatus,
+                status: 'disconnected',
                 lastSync: null,
                 nextSync: null,
                 recordCount: 0,
-                connectedHandle: null
+                connectedHandle: null,
               }
             : p
         )
@@ -388,7 +402,7 @@ export default function ChannelsPage() {
       setPlatforms(prev => 
         prev.map(p => 
           p.id === 'instagram' 
-            ? { ...p, status: 'syncing' as ConnectionStatus }
+            ? { ...p, status: 'syncing' }
             : p
         )
       );
@@ -401,11 +415,11 @@ export default function ChannelsPage() {
         p.id === platformId 
           ? { 
               ...p, 
-              status: 'disconnected' as ConnectionStatus,
+              status: 'disconnected',
               lastSync: null,
               nextSync: null,
               recordCount: 0,
-              connectedHandle: null
+              connectedHandle: null,
             }
           : p
       )
@@ -416,7 +430,7 @@ export default function ChannelsPage() {
     setPlatforms(prev => 
       prev.map(p => 
         p.id === platformId 
-          ? { ...p, status: 'syncing' as ConnectionStatus }
+          ? { ...p, status: 'syncing' }
           : p
       )
     );
@@ -427,10 +441,10 @@ export default function ChannelsPage() {
           p.id === platformId 
             ? { 
                 ...p, 
-                status: 'connected' as ConnectionStatus,
+                status: 'connected',
                 lastSync: 'just now',
                 nextSync: `in ${p.refreshInterval}`,
-                recordCount: p.recordCount + Math.floor(Math.random() * 10)
+                recordCount: p.recordCount + Math.floor(Math.random() * 10),
               }
             : p
         )
