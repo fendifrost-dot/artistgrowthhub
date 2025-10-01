@@ -17,7 +17,8 @@ import {
   Plus,
   Music,
   Youtube,
-  Instagram
+  Instagram,
+  Facebook
 } from 'lucide-react';
 import { PlatformConnection } from '@/types';
 
@@ -38,14 +39,16 @@ interface ActivityItem {
 }
 
 // Icon mapping for platforms
-const platformIcons = {
+const platformIcons: Record<string, React.ComponentType<any>> = {
   youtube: Youtube,
+  music: Music,
+  instagram: Instagram,
+  facebook: Facebook,
+  twitter: Play,
   spotify: Music,
   apple: Music,
   soundcloud: Music,
-  instagram: Instagram,
-  even: Music,
-  twitter: Play
+  even: Music
 };
 
 const conversionFunnel = [
