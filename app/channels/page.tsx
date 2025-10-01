@@ -534,7 +534,8 @@ export default function ChannelsPage() {
                       <div className="space-y-4">
                         <div>
                           <Label className="text-gray-300">
-                            {platform.inputType === 'webhook' ? 'Webhook Token' : 'Profile URL'}
+                            {platform.inputType === 'token' ? 'App Token' : 
+                             platform.inputType === 'pixel_id' ? 'Pixel ID' : 'Profile URL'}
                           </Label>
                           <Input
                             value={connectionInput}
