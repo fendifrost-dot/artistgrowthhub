@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export default function RootLayout({
+function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -24,3 +24,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+export default RootLayout;
