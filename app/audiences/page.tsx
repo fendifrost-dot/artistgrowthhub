@@ -74,9 +74,9 @@ export default function Audiences() {
     <div className="p-8 bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Audiences</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Fans</h1>
           <p className="text-gray-400">
-            Segment fans for targeted campaigns and monetization flows
+            Your complete fan database with engagement scores and segments
           </p>
         </div>
         <Button 

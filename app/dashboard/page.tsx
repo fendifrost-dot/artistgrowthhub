@@ -52,8 +52,8 @@ const platformIcons: Record<string, React.ComponentType<any>> = {
 };
 
 const conversionFunnel = [
-  { stage: 'Impressions', value: 45200, percentage: 100 },
-  { stage: 'Bot Engagement', value: 3847, percentage: 8.5 },
+  { stage: 'Ad Impressions', value: 45200, percentage: 100 },
+  { stage: 'Link Clicks', value: 3847, percentage: 8.5 },
   { stage: 'Email/SMS Opt-ins', value: 1247, percentage: 2.8 },
   { stage: 'EVEN Purchases', value: 89, percentage: 0.2 },
   { stage: 'Merch Purchases', value: 156, percentage: 0.3 }
@@ -101,10 +101,10 @@ export default function Dashboard() {
             color: 'text-purple-400'
           },
           {
-            name: 'Bot Conversations',
+            name: 'Email Opt-ins',
             value: connectedPlatforms.length > 0 ? '1,247' : '0',
             change: connectedPlatforms.length > 0 ? '+12.8%' : 'Connect platforms',
-            icon: MessageSquare,
+            icon: Mail,
             color: 'text-pink-400'
           }
         ];
@@ -129,14 +129,14 @@ export default function Dashboard() {
         if (connectedPlatforms.length > 0) {
           activities.push(
             {
-              type: 'bot',
-              message: 'Bot collected 23 new email opt-ins',
+              type: 'campaign',
+              message: 'ManyChat collected 23 new email opt-ins',
               time: '6 hours ago',
               icon: MessageSquare
             },
             {
               type: 'offer',
-              message: 'Welcome campaign sent to new followers',
+              message: 'Welcome email sent to new followers',
               time: '1 day ago',
               icon: Mail
             }
@@ -303,7 +303,7 @@ export default function Dashboard() {
             </Button>
             <Button className="w-full justify-start" variant="outline">
               <MessageSquare className="w-4 h-4 mr-2" />
-              Launch Bot Campaign
+              View Fan Segments
             </Button>
           </div>
         </Card>
@@ -316,7 +316,7 @@ export default function Dashboard() {
               <span className="text-xs text-green-400">Active</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-300">Bot Status</span>
+              <span className="text-sm text-gray-300">Integrations</span>
               <span className="text-xs text-green-400">Online</span>
             </div>
             <div className="flex justify-between items-center">

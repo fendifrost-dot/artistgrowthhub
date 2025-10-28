@@ -384,9 +384,9 @@ export default function ChannelsPage() {
   return (
     <div className="p-8 bg-gray-900 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Channels</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">Integrations</h1>
         <p className="text-gray-400">
-          Connect your platforms to unify fan data and drive monetization
+          Connect ManyChat, Meta Pixel, Klaviyo, and other platforms
         </p>
       </div>
 

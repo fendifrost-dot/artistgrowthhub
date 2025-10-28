@@ -45,9 +45,9 @@ export default function Analytics() {
     <div className="p-8 bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Analytics</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Campaigns</h1>
           <p className="text-gray-400">
-            Track your fan engagement and monetization performance
+            Track performance of your ads, chatbots, and email campaigns
           </p>
         </div>
         <div className="flex space-x-4">
