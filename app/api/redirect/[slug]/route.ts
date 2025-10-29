@@ -2,46 +2,49 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from "next/server";
-
-// Mock function to fetch destination for slug
-async function fetchDestForSlug(slug: string) {
-  // In a real app, this would query the database
-  const destinations: Record<string, any> = {
-    'new-single': { dest: 'even', finalUrl: 'https://even.com/fendi-frost/midnight-vibes' },
-    'merch-store': { dest: 'bemoremodest', finalUrl: 'https://bemoremodest.com/collections/fendi-frost' },
-    'exclusive-track': { dest: 'even', finalUrl: 'https://even.com/fendi-frost/exclusive' },
-    'vinyl-drop': { dest: 'bemoremodest', finalUrl: 'https://bemoremodest.com/products/vinyl-collection' }
-  };
-  
-  return destinations[slug] || null;
-}
+import { prisma } from "@/lib/db";
 
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   const url = new URL(req.url);
   const slug = params.slug;
-  
-  const dest = await fetchDestForSlug(slug);
-  if (!dest) {
+
+  const smartLink = await prisma.smartLink.findUnique({
+    where: { slug, active: true }
+  });
+
+  if (!smartLink) {
     return NextResponse.redirect(`${process.env.APP_BASE_URL || 'http://localhost:3000'}/404`, 302);
   }
 
   const clickId = Math.random().toString(36).substring(7);
   const fbclid = url.searchParams.get("fbclid") || undefined;
+  const userAgent = req.headers.get("user-agent") || undefined;
+  const referer = req.headers.get("referer") || undefined;
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ||
+             req.headers.get("x-real-ip") ||
+             undefined;
 
-  // Log ClickOutbound event (fire-and-forget)
+  await prisma.smartLink.update({
+    where: { id: smartLink.id },
+    data: { clickCount: { increment: 1 } }
+  });
+
   try {
     await fetch(`${process.env.APP_BASE_URL || 'http://localhost:3000'}/api/events/ingest`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         type: "ClickOutbound",
-        dest: dest.dest,
+        smartLinkId: smartLink.id,
         content_id: slug,
         click_id: clickId,
         fbclid,
-        utm_source: url.searchParams.get("utm_source"),
-        utm_medium: url.searchParams.get("utm_medium"),
-        utm_campaign: url.searchParams.get("utm_campaign"),
+        utm_source: url.searchParams.get("utm_source") || smartLink.utmSource,
+        utm_medium: url.searchParams.get("utm_medium") || smartLink.utmMedium,
+        utm_campaign: url.searchParams.get("utm_campaign") || smartLink.utmCampaign,
+        user_agent: userAgent,
+        referer,
+        ip_address: ip,
         source: "smartlink",
         ts: new Date().toISOString()
       }),
@@ -50,5 +53,5 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     console.error("Failed to log click event:", error);
   }
 
-  return NextResponse.redirect(dest.finalUrl, 302);
+  return NextResponse.redirect(smartLink.destination, 302);
 }

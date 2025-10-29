@@ -114,3 +114,20 @@ model AdSpend {
   createdAt   DateTime @default(now())
   @@index([platform, date])
 }
+
+model SmartLink {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  destination   String
+  title         String?
+  campaignName  String?
+  utmSource     String?
+  utmMedium     String?
+  utmCampaign   String?
+  active        Boolean  @default(true)
+  clickCount    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@index([slug])
+  @@index([active, createdAt])
+}

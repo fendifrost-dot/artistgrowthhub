@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChartBar as BarChart3, Users, Link as LinkIcon, Gift, Settings, Music, TrendingUp, Zap } from 'lucide-react';
+import { ChartBar as BarChart3, Users, Link2, Gift, Settings, Music, TrendingUp, Zap } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
   { name: 'Fans', href: '/audiences', icon: Users },
   { name: 'Campaigns', href: '/analytics', icon: TrendingUp },
+  { name: 'Smart Links', href: '/smartlinks', icon: Link2 },
   { name: 'Offers', href: '/offers', icon: Gift },
   { name: 'Integrations', href: '/channels', icon: Zap },
   { name: 'Settings', href: '/settings', icon: Settings },
