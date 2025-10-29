@@ -59,14 +59,16 @@ export async function resolveOrCreateUser(identifiers: {
     });
   }
 
+  const finalUserId = userId!;
+
   if (identifiers.fbclid) {
     await prisma.identity.upsert({
       where: {
-        id: `${userId}-fbclid-${identifiers.fbclid}`
+        id: `${finalUserId}-fbclid-${identifiers.fbclid}`
       },
       update: {},
       create: {
-        userId,
+        userId: finalUserId,
         type: "fbclid",
         value: identifiers.fbclid
       }
@@ -76,16 +78,16 @@ export async function resolveOrCreateUser(identifiers: {
   if (identifiers.anonymousId) {
     await prisma.identity.upsert({
       where: {
-        id: `${userId}-anonymous_id-${identifiers.anonymousId}`
+        id: `${finalUserId}-anonymous_id-${identifiers.anonymousId}`
       },
       update: {},
       create: {
-        userId,
+        userId: finalUserId,
         type: "anonymous_id",
         value: identifiers.anonymousId
       }
     });
   }
 
-  return userId;
+  return finalUserId;
 }

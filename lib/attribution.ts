@@ -114,7 +114,7 @@ export async function getConversionStats(smartLinkId: string) {
   });
 
   const validClickIds = clickIds
-    .map(e => e.clickId)
+    .map((e: { clickId: string | null }) => e.clickId)
     .filter(Boolean) as string[];
 
   const conversions = await prisma.purchase.count({
