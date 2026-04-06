@@ -1,0 +1,85 @@
+# Artist Growth Hub — Supabase Edge Functions
+# Project ref (production): vsemrziqxrrfcquxfnwd
+# Source of truth for deploy: Lovable; keep this file in sync when adding functions.
+#
+# FanFuel / Control Center use FANFUEL_HUB_KEY (not JWT) — those entries MUST stay verify_jwt = false
+# or invokers will get 401 despite a valid hub key.
+
+[functions.control-center-api]
+verify_jwt = false
+
+[functions.execute-pitch]
+verify_jwt = false
+
+[functions.pitch-status]
+verify_jwt = false
+
+[functions.playlist-batch]
+verify_jwt = false
+
+[functions.playlist-research]
+verify_jwt = false
+
+[functions.send-pitch-email]
+verify_jwt = false
+
+[functions.update-pitch-status]
+verify_jwt = false
+
+# Lovable: `verify_jwt = false` — function validates auth in code (not Supabase JWT at edge).
+[functions.fan-intelligence]
+verify_jwt = false
+
+[functions.fetch-public-spotify-data]
+verify_jwt = false
+
+[functions.get-og-metadata]
+verify_jwt = false
+
+[functions.healthcheck]
+verify_jwt = false
+
+[functions.instagram-messaging]
+verify_jwt = false
+
+[functions.meta-conversions]
+verify_jwt = false
+
+[functions.project-stats]
+verify_jwt = false
+
+# Lovable: `verify_jwt = false` — function validates auth in code.
+[functions.scrape-chartmetric]
+verify_jwt = false
+
+[functions.shopify-order-webhook]
+verify_jwt = false
+
+[functions.soundcloud-auth]
+verify_jwt = false
+
+[functions.soundcloud-callback]
+verify_jwt = false
+
+[functions.soundcloud-stats]
+verify_jwt = false
+
+[functions.spotify-auth]
+verify_jwt = false
+
+[functions.spotify-callback]
+verify_jwt = false
+
+[functions.spotify-stats]
+verify_jwt = false
+
+[functions.youtube-auth]
+verify_jwt = false
+
+[functions.youtube-callback]
+verify_jwt = false
+
+[functions.youtube-stats]
+verify_jwt = false
+
+# Legacy `[functions.ogmetadata]` removed in Lovable (no matching function dir).

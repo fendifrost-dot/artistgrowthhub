@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserProfile {
+  id            String   @id @default(cuid())
+  emailHash     String?  @unique
+  phoneHash     String?  @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  consentEmail  Boolean  @default(false)
+  consentSMS    Boolean  @default(false)
+  quietHoursTZ  String?  // e.g., America/Chicago
+  quietStartMin Int?     // minutes from midnight
+  quietEndMin   Int?
+  lastSeenAt    DateTime?
+  identities    Identity[]
+  events        Event[]
+  purchases     Purchase[]
+}
+
+model Identity {
+  id        String   @id @default(cuid())
+  userId    String
+  user      UserProfile @relation(fields: [userId], references: [id])
+  type      String   // anonymous_id | fbclid | ig_user | sc_user | etc.
+  value     String
+  createdAt DateTime @default(now())
+  @@index([type, value])
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      UserProfile? @relation(fields: [userId], references: [id])
+  anonymousId String?
+  type      String   // ViewContent, ClickOutbound, Purchase, StreamSignal, etc.
+  payload   Json
+  source    String   // website, smartlink, shopify, even, spotify, apple, sc
+  clickId   String?
+  createdAt DateTime @default(now())
+  @@index([type, source, createdAt])
+  @@index([clickId])
+}
+
+model Offer {
+  id        String   @id @default(cuid())
+  name      String
+  channel   String   // chat | sms | email | igdm
+  kind      String   // discount | bundle | download | link
+  config    Json     // {discount_pct, coupon, url, expiresAt, minSpend,...}
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  issuedLinks IssuedLink[]
+}
+
+model IssuedLink {
+  id        String   @id @default(cuid())
+  offerId   String
+  offer     Offer    @relation(fields: [offerId], references: [id])
+  userId    String?
+  token     String   @unique
+  url       String   // resolved final URL
+  expiresAt DateTime?
+  redeemed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Purchase {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      UserProfile? @relation(fields: [userId], references: [id])
+  source    String   // shopify | even
+  orderId   String   @unique
+  value     Decimal  @db.Decimal(12,2)
+  currency  String
+  clickId   String?
+  createdAt DateTime @default(now())
+}
+
+model BotRule {
+  id        String   @id @default(cuid())
+  name      String
+  enabled   Boolean  @default(true)
+  trigger   String   // e.g., StreamSignal:new_single, AbandonedCheckout, etc.
+  audience  Json     // include/exclude filters
+  offerId   String
+  channel   String   // sms | email | chat | igdm
+  cooldownH Int      @default(72)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdSpend {
+  id          String   @id @default(cuid())
+  platform    String   // meta
+  campaignId  String
+  adsetId     String?
+  adId        String?
+  date        DateTime
+  spend       Decimal  @db.Decimal(12,2)
+  impressions Int?
+  clicks      Int?
+  results     Int?
+  createdAt   DateTime @default(now())
+  @@index([platform, date])
+}
+
+model SmartLink {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  destination   String
+  title         String?
+  campaignName  String?
+  utmSource     String?
+  utmMedium     String?
+  utmCampaign   String?
+  active        Boolean  @default(true)
+  clickCount    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@index([slug])
+  @@index([active, createdAt])
+}
